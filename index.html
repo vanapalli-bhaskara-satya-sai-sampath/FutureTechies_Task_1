@@ -1,569 +1,452 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AQI in India — Air Quality Index</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <title>AQI India — Air Quality Index</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0e0f13;
-      --text: #e8e6e0;
-      --muted: #7a7870;
-      --card-bg: #16181f;
-      --border: rgba(255,255,255,0.07);
-      --good:      #4caf7d;
-      --satisfactory: #8bc34a;
-      --moderate:  #ffc107;
-      --poor:      #ff7043;
-      --very-poor: #e53935;
-      --severe:    #7b1fa2;
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#05060d;
+      --surface:rgba(10,12,22,0.78);
+      --border:rgba(255,255,255,0.07);
+      --text:#eceae3;
+      --muted:#6e6c66;
+      --accent:#ff6b35;
+      --good:#3ecf7a;
+      --sat:#8fd44a;
+      --mod:#f5c400;
+      --poor:#ff6b35;
+      --vpoor:#e83030;
+      --severe:#b044d4;
     }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-weight: 300;
-      line-height: 1.7;
-      min-height: 100vh;
-    }
-
-    /* ── Header ── */
-    header {
-      background: linear-gradient(135deg, #12141a 0%, #1a1d28 100%);
-      border-bottom: 1px solid var(--border);
-      padding: 3.5rem 2rem 3rem;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    header::before {
-      content: '';
-      position: absolute;
-      top: -60px; left: 50%;
-      transform: translateX(-50%);
-      width: 480px; height: 240px;
-      background: radial-gradient(ellipse, rgba(255,112,67,0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    header .badge {
-      display: inline-block;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #ff7043;
-      border: 1px solid rgba(255,112,67,0.4);
-      border-radius: 2px;
-      padding: 0.3rem 0.9rem;
-      margin-bottom: 1.2rem;
-    }
-    header h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2.4rem, 6vw, 4rem);
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
-    }
-    header h1 span { color: #ff7043; }
-    header p {
-      max-width: 560px;
-      margin: 0 auto;
-      color: var(--muted);
-      font-size: 1rem;
-    }
-
-    /* ── Layout ── */
-    main {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 3.5rem 1.5rem 5rem;
-    }
-
-    section-title {
-      display: block;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      margin-bottom: 1.6rem;
-    }
-
-    /* ── What is AQI ── */
-    .intro-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 3.5rem;
-    }
-    @media(max-width:640px){ .intro-grid { grid-template-columns: 1fr; } }
-
-    .intro-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 2rem;
-    }
-    .intro-card h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.3rem;
-      margin-bottom: 0.8rem;
-    }
-    .intro-card p { color: #aaa89e; font-size: 0.95rem; }
-
-    /* ── AQI Scale ── */
-    .scale-section { margin-bottom: 3.5rem; }
-    .scale-section > p { color: var(--muted); margin-bottom: 1.8rem; font-size: 0.95rem; }
-
-    .aqi-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.93rem;
-    }
-    .aqi-table thead tr {
-      border-bottom: 1px solid var(--border);
-    }
-    .aqi-table th {
-      text-align: left;
-      padding: 0.7rem 1rem;
-      color: var(--muted);
-      font-weight: 500;
-      font-size: 0.78rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .aqi-table td {
-      padding: 0.9rem 1rem;
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-    .aqi-table tr:last-child td { border-bottom: none; }
-    .aqi-table tr:hover td { background: rgba(255,255,255,0.03); }
-
-    .color-dot {
-      display: inline-block;
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      margin-right: 0.6rem;
-      vertical-align: middle;
-      flex-shrink: 0;
-    }
-    .level-name {
-      display: flex;
-      align-items: center;
-      font-weight: 500;
-    }
-
-    /* ── Health Impact Cards ── */
-    .impact-section { margin-bottom: 3.5rem; }
-    .impact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-      gap: 1.2rem;
-    }
-    .impact-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.6rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .impact-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 4px; height: 100%;
-      border-radius: 12px 0 0 12px;
-    }
-    .impact-card .range {
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 0.4rem;
-    }
-    .impact-card h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.2rem;
-      margin-bottom: 0.8rem;
-    }
-    .impact-card p { font-size: 0.9rem; color: #aaa89e; }
-
-    /* per-level coloring */
-    .lv-good    { border-color: rgba(76,175,125,0.3); } .lv-good::before    { background: var(--good); }
-    .lv-sat     { border-color: rgba(139,195,74,0.3); } .lv-sat::before     { background: var(--satisfactory); }
-    .lv-mod     { border-color: rgba(255,193,7,0.3);  } .lv-mod::before     { background: var(--moderate); }
-    .lv-poor    { border-color: rgba(255,112,67,0.3); } .lv-poor::before    { background: var(--poor); }
-    .lv-vpoor   { border-color: rgba(229,57,53,0.3);  } .lv-vpoor::before   { background: var(--very-poor); }
-    .lv-severe  { border-color: rgba(123,31,162,0.3); } .lv-severe::before  { background: var(--severe); }
-
-    /* ── India Cities Snapshot ── */
-    .cities-section { margin-bottom: 3.5rem; }
-    .cities-section > p { color: var(--muted); margin-bottom: 1.6rem; font-size: 0.95rem; }
-
-    .city-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-    .city-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.4rem 1.2rem;
-      text-align: center;
-    }
-    .city-card .city-name { font-weight: 500; margin-bottom: 0.8rem; font-size: 0.95rem; }
-    .city-card .aqi-val {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.4rem;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 0.4rem;
-    }
-    .city-card .city-level {
-      font-size: 0.75rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    /* ── Pollutants ── */
-    .poll-section { margin-bottom: 3.5rem; }
-    .poll-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1.2rem;
-    }
-    .poll-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.6rem;
-    }
-    .poll-card .symbol {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: #ff7043;
-      margin-bottom: 0.3rem;
-    }
-    .poll-card h3 { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.6rem; }
-    .poll-card p { font-size: 0.87rem; color: #aaa89e; }
-
-    /* ── Tips ── */
-    .tips-section { }
-    .tips-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.2rem;
-    }
-    @media(max-width:640px){ .tips-grid { grid-template-columns: 1fr; } }
-
-    .tip-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.6rem;
-    }
-    .tip-card h3 { font-weight: 500; margin-bottom: 0.8rem; font-size: 0.98rem; color: #e8e6e0; }
-    .tip-card ul { padding-left: 1.2rem; }
-    .tip-card li { font-size: 0.88rem; color: #aaa89e; margin-bottom: 0.4rem; }
-
-    /* ── Section dividers ── */
-    .section-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #ff7043;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-    }
-    .section-heading {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.7rem;
-      font-weight: 700;
-      margin-bottom: 1.4rem;
-    }
-
-    footer {
-      text-align: center;
-      padding: 2rem;
-      color: var(--muted);
-      font-size: 0.8rem;
-      border-top: 1px solid var(--border);
-    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.72;overflow-x:hidden;}
+    #map-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+    header{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5rem 2rem 4rem;background:linear-gradient(180deg,rgba(5,6,13,0.72) 0%,rgba(5,6,13,0.42) 60%,rgba(5,6,13,0.82) 100%);}
+    .eyebrow{display:inline-flex;align-items:center;gap:.6rem;font-size:.7rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(255,107,53,.38);padding:.35rem 1rem;border-radius:2px;margin-bottom:2rem;}
+    .eyebrow::before,.eyebrow::after{content:'';display:block;width:20px;height:1px;background:rgba(255,107,53,.5);}
+    header h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,7vw,5.2rem);font-weight:900;line-height:1.05;letter-spacing:-.025em;margin-bottom:1.4rem;}
+    header h1 em{font-style:normal;color:var(--accent);}
+    .hero-sub{max-width:540px;color:var(--muted);font-size:1.05rem;margin-bottom:3rem;}
+    .stat-row{display:flex;gap:3rem;flex-wrap:wrap;justify-content:center;margin-bottom:4rem;}
+    .stat-num{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:var(--accent);}
+    .stat-label{font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:.3rem;}
+    .caret{display:flex;flex-direction:column;align-items:center;gap:.5rem;color:rgba(255,255,255,.18);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;}
+    .caret-line{width:1px;height:52px;background:linear-gradient(to bottom,rgba(255,107,53,.7),transparent);}
+    main{position:relative;z-index:10;max-width:1100px;margin:0 auto;padding:5rem 1.6rem 6rem;}
+    .section-chip{font-size:.68rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem;}
+    .section-title{font-family:'Playfair Display',serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:700;margin-bottom:1.6rem;}
+    .divider{width:48px;height:2px;background:rgba(255,107,53,.4);margin-bottom:1.4rem;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);}
+    .intro-wrap{margin-bottom:5rem}
+    .intro-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;}
+    @media(max-width:620px){.intro-grid{grid-template-columns:1fr}}
+    .intro-card{padding:2rem;}
+    .intro-card h3{font-family:'Playfair Display',serif;font-size:1.15rem;margin-bottom:.7rem;}
+    .intro-card p{font-size:.93rem;color:#9b9990}
+    .scale-wrap{margin-bottom:5rem}
+    .scale-desc{color:var(--muted);font-size:.94rem;margin-bottom:2rem}
+    .aqi-bars{display:flex;flex-direction:column;gap:.8rem}
+    .aqi-bar-row{display:grid;grid-template-columns:100px 1fr 220px;align-items:center;gap:1.4rem;padding:1.1rem 1.6rem;}
+    @media(max-width:700px){.aqi-bar-row{grid-template-columns:80px 1fr;gap:.8rem}.bar-advisory{display:none}}
+    .bar-range{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;white-space:nowrap;}
+    .bar-center{display:flex;flex-direction:column;gap:.3rem}
+    .bar-label{display:flex;align-items:center;gap:.6rem;font-weight:500;font-size:.95rem;}
+    .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .bar-track{height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden;}
+    .bar-fill{height:100%;border-radius:3px;}
+    .bar-health{font-size:.82rem;color:var(--muted)}
+    .bar-advisory{font-size:.81rem;color:#7a7870;line-height:1.5}
+    .impact-wrap{margin-bottom:5rem}
+    .impact-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.3rem;}
+    .impact-card{padding:1.8rem;position:relative;overflow:hidden;}
+    .impact-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;}
+    .ic-range{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem;}
+    .impact-card h3{font-family:'Playfair Display',serif;font-size:1.22rem;margin-bottom:.7rem;}
+    .impact-card p{font-size:.9rem;color:#9b9990}
+    .ic-tag{display:inline-block;margin-top:1rem;font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:.25rem .7rem;border-radius:20px;border:1px solid;}
+    .cities-wrap{margin-bottom:5rem}
+    .cities-desc{color:var(--muted);font-size:.94rem;margin-bottom:2rem}
+    .city-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:1.1rem;}
+    .city-card{padding:1.6rem 1.4rem;text-align:center;position:relative;overflow:hidden;transition:transform .2s;}
+    .city-card:hover{transform:translateY(-3px)}
+    .city-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+    .city-name{font-weight:500;font-size:.92rem;margin-bottom:.9rem;color:var(--muted)}
+    .city-aqi{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;line-height:1;margin-bottom:.4rem;}
+    .city-status{font-size:.7rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;}
+    .poll-wrap{margin-bottom:5rem}
+    .poll-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1.3rem;}
+    .poll-card{padding:1.8rem;}
+    .poll-symbol{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--accent);margin-bottom:.2rem;}
+    .poll-name{font-size:.88rem;font-weight:500;margin-bottom:.6rem;}
+    .poll-desc{font-size:.86rem;color:#9b9990}
+    .tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;}
+    @media(max-width:620px){.tips-grid{grid-template-columns:1fr}}
+    .tip-card{padding:1.8rem;}
+    .tip-card h3{font-size:.96rem;font-weight:500;margin-bottom:.9rem;}
+    .tip-card li{font-size:.87rem;color:#9b9990;margin-bottom:.45rem;padding-left:.2rem;}
+    .tip-card ul{padding-left:1.1rem;}
+    .ic-good::before{background:var(--good)} .ic-sat::before{background:var(--sat)}
+    .ic-mod::before{background:var(--mod)}   .ic-poor::before{background:var(--poor)}
+    .ic-vpoor::before{background:var(--vpoor)} .ic-severe::before{background:var(--severe)}
+    footer{position:relative;z-index:10;text-align:center;padding:2.2rem 2rem;font-size:.78rem;color:var(--muted);border-top:1px solid var(--border);background:rgba(5,6,13,.88);backdrop-filter:blur(10px);}
+    footer strong{color:rgba(255,107,53,.7);font-weight:400}
   </style>
 </head>
 <body>
+<canvas id="map-canvas"></canvas>
 
 <header>
-  <div class="badge">Public Health Reference</div>
-  <h1>Air Quality Index<br/><span>& Its Impact in India</span></h1>
-  <p>Understanding how air pollution affects millions of Indians — from daily discomfort to long-term health consequences.</p>
+  <div class="eyebrow">India Air Quality</div>
+  <h1>Air Quality Index<br/>&amp; Its <em>Impact</em> in India</h1>
+  <p class="hero-sub">Tracking pollution across a billion lives — from smoggy winters in Delhi to cleaner coastal air in Chennai.</p>
+  <div class="stat-row">
+    <div class="stat-item"><div class="stat-num">1.6M</div><div class="stat-label">Deaths per year</div></div>
+    <div class="stat-item"><div class="stat-num">39/40</div><div class="stat-label">Most polluted cities</div></div>
+    <div class="stat-item"><div class="stat-num">0–500</div><div class="stat-label">AQI Scale</div></div>
+    <div class="stat-item"><div class="stat-num">8</div><div class="stat-label">Pollutants tracked</div></div>
+  </div>
+  <div class="caret"><div class="caret-line"></div>Scroll</div>
 </header>
 
 <main>
-
   <!-- What is AQI -->
-  <div style="margin-bottom:3.5rem;">
-    <p class="section-label">Overview</p>
-    <p class="section-heading">What is AQI?</p>
+  <div class="intro-wrap">
+    <div class="section-chip">Overview</div>
+    <div class="section-title">Understanding the Air Quality Index</div>
+    <div class="divider"></div>
     <div class="intro-grid">
-      <div class="intro-card">
-        <h2>Definition</h2>
-        <p>The Air Quality Index (AQI) is a standardised scale used by governments and environmental agencies to communicate daily air quality to the public. In India, it is computed by the Central Pollution Control Board (CPCB) based on the concentrations of eight major pollutants.</p>
+      <div class="intro-card card"><h3>What is AQI?</h3><p>The Air Quality Index is a standardised scale used to communicate how clean or polluted the air is. India's NAQI, launched by CPCB in 2014, runs from 0 (pristine) to 500 (hazardous) and is displayed at monitoring stations and apps nationwide.</p></div>
+      <div class="intro-card card"><h3>How is it Calculated?</h3><p>CPCB measures eight pollutants — PM2.5, PM10, NO₂, SO₂, CO, O₃, NH₃ and Pb. Each is converted to a sub-index on a 0–500 scale. The final AQI equals the highest sub-index value, representing the worst threat at any moment.</p></div>
+      <div class="intro-card card"><h3>Why Does It Matter?</h3><p>India accounts for the majority of the world's 40 most polluted cities. Prolonged exposure to poor air shortens life expectancy, worsens chronic conditions, and costs the economy billions in healthcare and productivity losses every year.</p></div>
+      <div class="intro-card card"><h3>Seasonal Patterns in India</h3><p>AQI in north India spikes sharply from October to February as crop stubble burning, Diwali fireworks, and winter temperature inversions trap pollutants near the ground. Monsoon months typically bring the only consistent relief to polluted cities.</p></div>
+    </div>
+  </div>
+
+  <!-- AQI Scale -->
+  <div class="scale-wrap">
+    <div class="section-chip">Scale</div>
+    <div class="section-title">India's National AQI Categories</div>
+    <div class="divider"></div>
+    <p class="scale-desc">Six colour-coded bands — each linked to specific health guidance for the general public and vulnerable groups.</p>
+    <div class="aqi-bars">
+      <div class="aqi-bar-row card" style="border-left:3px solid var(--good)">
+        <div class="bar-range" style="color:var(--good)">0–50</div>
+        <div class="bar-center"><div class="bar-label"><span class="dot" style="background:var(--good)"></span>Good</div><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--good)"></div></div><div class="bar-health">Minimal or no health impact</div></div>
+        <div class="bar-advisory">No restrictions needed. All outdoor activities are safe.</div>
       </div>
-      <div class="intro-card">
-        <h2>How it is Calculated</h2>
-        <p>CPCB measures concentrations of PM2.5, PM10, NO₂, SO₂, CO, O₃, NH₃ and Pb at monitoring stations. Each pollutant is converted to a sub-index on a 0–500 scale. The highest sub-index value among all pollutants becomes the overall AQI.</p>
+      <div class="aqi-bar-row card" style="border-left:3px solid var(--sat)">
+        <div class="bar-range" style="color:var(--sat)">51–100</div>
+        <div class="bar-center"><div class="bar-label"><span class="dot" style="background:var(--sat)"></span>Satisfactory</div><div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--sat)"></div></div><div class="bar-health">Minor discomfort for very sensitive individuals</div></div>
+        <div class="bar-advisory">Sensitive people may reduce prolonged outdoor exertion.</div>
       </div>
-      <div class="intro-card">
-        <h2>Why it Matters for India</h2>
-        <p>India is home to several of the world's most polluted cities. According to IQAir, 39 of the 40 most polluted cities globally are in South Asia — with India accounting for the majority. Poor air quality claims an estimated 1.6 million lives in India every year.</p>
+      <div class="aqi-bar-row card" style="border-left:3px solid var(--mod)">
+        <div class="bar-range" style="color:var(--mod)">101–200</div>
+        <div class="bar-center"><div class="bar-label"><span class="dot" style="background:var(--mod)"></span>Moderate</div><div class="bar-track"><div class="bar-fill" style="width:40%;background:var(--mod)"></div></div><div class="bar-health">Breathing discomfort for asthma, heart &amp; lung patients</div></div>
+        <div class="bar-advisory">Heart/lung patients, children &amp; elderly: avoid prolonged exertion.</div>
       </div>
-      <div class="intro-card">
-        <h2>India's AQI Standard</h2>
-        <p>India uses the National AQI (NAQI) standard launched in 2014 by MoEF&CC. It uses the same 0–500 numerical scale divided into six colour-coded categories, each linked to specific health advisories for the general public and sensitive groups.</p>
+      <div class="aqi-bar-row card" style="border-left:3px solid var(--poor)">
+        <div class="bar-range" style="color:var(--poor)">201–300</div>
+        <div class="bar-center"><div class="bar-label"><span class="dot" style="background:var(--poor)"></span>Poor</div><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--poor)"></div></div><div class="bar-health">Discomfort for most people on prolonged exposure</div></div>
+        <div class="bar-advisory">Avoid prolonged outdoor activity. Sensitive groups stay indoors.</div>
+      </div>
+      <div class="aqi-bar-row card" style="border-left:3px solid var(--vpoor)">
+        <div class="bar-range" style="color:var(--vpoor)">301–400</div>
+        <div class="bar-center"><div class="bar-label"><span class="dot" style="background:var(--vpoor)"></span>Very Poor</div><div class="bar-track"><div class="bar-fill" style="width:80%;background:var(--vpoor)"></div></div><div class="bar-health">Respiratory illness after prolonged exposure</div></div>
+        <div class="bar-advisory">Avoid all outdoor activity. Keep windows closed at all times.</div>
+      </div>
+      <div class="aqi-bar-row card" style="border-left:3px solid var(--severe)">
+        <div class="bar-range" style="color:var(--severe)">401–500</div>
+        <div class="bar-center"><div class="bar-label"><span class="dot" style="background:var(--severe)"></span>Severe</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--severe)"></div></div><div class="bar-health">Health emergency — serious risk for all people</div></div>
+        <div class="bar-advisory">Remain indoors. N95/N99 mask mandatory if stepping out.</div>
       </div>
     </div>
   </div>
 
-  <!-- AQI Scale Table -->
-  <div class="scale-section">
-    <p class="section-label">Categories</p>
-    <p class="section-heading">The AQI Scale</p>
-    <p>India's National AQI is divided into six broad categories. Each carries a distinct colour code and health message.</p>
-    <table class="aqi-table">
-      <thead>
-        <tr>
-          <th>AQI Range</th>
-          <th>Category</th>
-          <th>Health Implications</th>
-          <th>Advisory</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>0 – 50</td>
-          <td><span class="level-name"><span class="color-dot" style="background:var(--good)"></span>Good</span></td>
-          <td>Minimal or no impact</td>
-          <td>No precautions needed</td>
-        </tr>
-        <tr>
-          <td>51 – 100</td>
-          <td><span class="level-name"><span class="color-dot" style="background:var(--satisfactory)"></span>Satisfactory</span></td>
-          <td>Minor breathing discomfort for sensitive people</td>
-          <td>Unusually sensitive people should reduce prolonged exertion</td>
-        </tr>
-        <tr>
-          <td>101 – 200</td>
-          <td><span class="level-name"><span class="color-dot" style="background:var(--moderate)"></span>Moderate</span></td>
-          <td>Breathing discomfort for asthma, heart, lung patients</td>
-          <td>People with heart/lung disease, children, elderly — reduce prolonged outdoor exertion</td>
-        </tr>
-        <tr>
-          <td>201 – 300</td>
-          <td><span class="level-name"><span class="color-dot" style="background:var(--poor)"></span>Poor</span></td>
-          <td>Breathing discomfort for most people on prolonged exposure</td>
-          <td>Avoid prolonged outdoor exertion; sensitive groups should stay indoors</td>
-        </tr>
-        <tr>
-          <td>301 – 400</td>
-          <td><span class="level-name"><span class="color-dot" style="background:var(--very-poor)"></span>Very Poor</span></td>
-          <td>Respiratory illness after prolonged exposure</td>
-          <td>Avoid all outdoor activity; keep windows closed</td>
-        </tr>
-        <tr>
-          <td>401 – 500</td>
-          <td><span class="level-name"><span class="color-dot" style="background:var(--severe)"></span>Severe</span></td>
-          <td>Affects healthy people; seriously ill-effects on sensitive groups</td>
-          <td>Remain indoors; if forced outside, wear N95/N99 masks; avoid physical activity</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Health Impact Cards -->
-  <div class="impact-section">
-    <p class="section-label">Health Impact</p>
-    <p class="section-heading">Level-by-Level Effects</p>
+  <!-- Health Impact -->
+  <div class="impact-wrap">
+    <div class="section-chip">Health Impact</div>
+    <div class="section-title">What Each Level Does to Your Body</div>
+    <div class="divider"></div>
     <div class="impact-grid">
-      <div class="impact-card lv-good">
-        <p class="range">AQI 0 – 50</p>
-        <h3 style="color:var(--good)">Good</h3>
-        <p>Air quality is considered satisfactory. No significant risk from outdoor activity. Safe for all groups including children, elderly, and those with chronic conditions.</p>
-      </div>
-      <div class="impact-card lv-sat">
-        <p class="range">AQI 51 – 100</p>
-        <h3 style="color:var(--satisfactory)">Satisfactory</h3>
-        <p>Acceptable air quality but there may be moderate health concerns for very sensitive individuals. People with severe asthma may notice mild irritation.</p>
-      </div>
-      <div class="impact-card lv-mod">
-        <p class="range">AQI 101 – 200</p>
-        <h3 style="color:var(--moderate)">Moderate</h3>
-        <p>Members of sensitive groups may experience health effects. Children and elderly may experience eye and throat irritation. Most people are not affected.</p>
-      </div>
-      <div class="impact-card lv-poor">
-        <p class="range">AQI 201 – 300</p>
-        <h3 style="color:var(--poor)">Poor</h3>
-        <p>Everyone may begin to experience adverse health effects. Persistent cough, shortness of breath and chest tightness become common, particularly for outdoor workers.</p>
-      </div>
-      <div class="impact-card lv-vpoor">
-        <p class="range">AQI 301 – 400</p>
-        <h3 style="color:var(--very-poor)">Very Poor</h3>
-        <p>Health warnings for the entire population. Risk of respiratory diseases and aggravation of cardiovascular diseases increases significantly. Visibility may drop.</p>
-      </div>
-      <div class="impact-card lv-severe">
-        <p class="range">AQI 401 – 500</p>
-        <h3 style="color:var(--severe)">Severe</h3>
-        <p>Emergency health conditions. Serious aggravation of heart and lung diseases; premature mortality possible in older adults. Entire population likely affected. Schools and businesses often close.</p>
-      </div>
+      <div class="impact-card card ic-good" style="border-color:rgba(62,207,122,.22)"><div class="ic-range">AQI 0–50</div><h3 style="color:var(--good)">Good</h3><p>Air quality is clean and poses no risk. All outdoor activities are safe, even for sensitive groups including children, the elderly, and those with chronic respiratory or heart conditions.</p><div class="ic-tag" style="color:var(--good);border-color:rgba(62,207,122,.3)">✓ All clear</div></div>
+      <div class="impact-card card ic-sat" style="border-color:rgba(143,212,74,.22)"><div class="ic-range">AQI 51–100</div><h3 style="color:var(--sat)">Satisfactory</h3><p>Acceptable air quality. A small number of unusually sensitive people may experience mild symptoms such as slight throat irritation. Most of the population will notice no effects.</p><div class="ic-tag" style="color:var(--sat);border-color:rgba(143,212,74,.3)">⚠ Watch if sensitive</div></div>
+      <div class="impact-card card ic-mod" style="border-color:rgba(245,196,0,.22)"><div class="ic-range">AQI 101–200</div><h3 style="color:var(--mod)">Moderate</h3><p>People with asthma, COPD, or heart disease may experience breathing discomfort. Eye and throat irritation is common in children and the elderly after extended outdoor exposure.</p><div class="ic-tag" style="color:var(--mod);border-color:rgba(245,196,0,.3)">⚠ Sensitive groups at risk</div></div>
+      <div class="impact-card card ic-poor" style="border-color:rgba(255,107,53,.22)"><div class="ic-range">AQI 201–300</div><h3 style="color:var(--poor)">Poor</h3><p>Nearly everyone may experience health effects. Persistent coughing, shortness of breath, and chest tightness are common. Outdoor workers face elevated risk during full shifts.</p><div class="ic-tag" style="color:var(--poor);border-color:rgba(255,107,53,.3)">✗ Reduce outdoor time</div></div>
+      <div class="impact-card card ic-vpoor" style="border-color:rgba(232,48,48,.22)"><div class="ic-range">AQI 301–400</div><h3 style="color:var(--vpoor)">Very Poor</h3><p>Health warnings issued for the entire population. Risk of serious respiratory and cardiovascular disease rises sharply. Visibility drops significantly. Schools may close.</p><div class="ic-tag" style="color:var(--vpoor);border-color:rgba(232,48,48,.3)">✗ Stay indoors</div></div>
+      <div class="impact-card card ic-severe" style="border-color:rgba(176,68,212,.22)"><div class="ic-range">AQI 401–500</div><h3 style="color:var(--severe)">Severe</h3><p>A public health emergency. Even brief outdoor exposure causes serious harm. Hospitals are placed on alert. Entire cities may shut outdoor events. Mask use is mandatory.</p><div class="ic-tag" style="color:var(--severe);border-color:rgba(176,68,212,.3)">✗ Emergency level</div></div>
     </div>
   </div>
 
-  <!-- Indian Cities Snapshot -->
-  <div class="cities-section">
-    <p class="section-label">India Snapshot</p>
-    <p class="section-heading">Typical AQI Levels — Major Indian Cities</p>
-    <p>Approximate annual average AQI values for major Indian cities based on recent monitoring data. Actual values vary seasonally — winters tend to be significantly worse.</p>
+  <!-- Cities -->
+  <div class="cities-wrap">
+    <div class="section-chip">India Snapshot</div>
+    <div class="section-title">Typical AQI — Major Indian Cities</div>
+    <div class="divider"></div>
+    <p class="cities-desc">Approximate annual-average AQI values. Winter peaks can be 2–3× higher in north Indian cities.</p>
     <div class="city-grid">
-      <div class="city-card">
-        <p class="city-name">Delhi</p>
-        <p class="aqi-val" style="color:var(--severe)">340</p>
-        <p class="city-level" style="color:var(--severe)">Very Poor</p>
-      </div>
-      <div class="city-card">
-        <p class="city-name">Mumbai</p>
-        <p class="aqi-val" style="color:var(--moderate)">142</p>
-        <p class="city-level" style="color:var(--moderate)">Moderate</p>
-      </div>
-      <div class="city-card">
-        <p class="city-name">Kolkata</p>
-        <p class="aqi-val" style="color:var(--poor)">218</p>
-        <p class="city-level" style="color:var(--poor)">Poor</p>
-      </div>
-      <div class="city-card">
-        <p class="city-name">Chennai</p>
-        <p class="aqi-val" style="color:var(--satisfactory)">88</p>
-        <p class="city-level" style="color:var(--satisfactory)">Satisfactory</p>
-      </div>
-      <div class="city-card">
-        <p class="city-name">Bengaluru</p>
-        <p class="aqi-val" style="color:var(--moderate)">110</p>
-        <p class="city-level" style="color:var(--moderate)">Moderate</p>
-      </div>
-      <div class="city-card">
-        <p class="city-name">Hyderabad</p>
-        <p class="aqi-val" style="color:var(--moderate)">125</p>
-        <p class="city-level" style="color:var(--moderate)">Moderate</p>
-      </div>
-      <div class="city-card">
-        <p class="city-name">Patna</p>
-        <p class="aqi-val" style="color:var(--very-poor)">315</p>
-        <p class="city-level" style="color:var(--very-poor)">Very Poor</p>
-      </div>
-      <div class="city-card">
-        <p class="city-name">Lucknow</p>
-        <p class="aqi-val" style="color:var(--very-poor)">290</p>
-        <p class="city-level" style="color:var(--poor)">Poor</p>
-      </div>
+      <div class="city-card card"><div class="city-name">Delhi</div><div class="city-aqi" style="color:var(--severe)">340</div><div class="city-status" style="color:var(--severe)">Very Poor</div></div>
+      <div class="city-card card"><div class="city-name">Mumbai</div><div class="city-aqi" style="color:var(--mod)">142</div><div class="city-status" style="color:var(--mod)">Moderate</div></div>
+      <div class="city-card card"><div class="city-name">Kolkata</div><div class="city-aqi" style="color:var(--poor)">218</div><div class="city-status" style="color:var(--poor)">Poor</div></div>
+      <div class="city-card card"><div class="city-name">Chennai</div><div class="city-aqi" style="color:var(--sat)">88</div><div class="city-status" style="color:var(--sat)">Satisfactory</div></div>
+      <div class="city-card card"><div class="city-name">Bengaluru</div><div class="city-aqi" style="color:var(--mod)">110</div><div class="city-status" style="color:var(--mod)">Moderate</div></div>
+      <div class="city-card card"><div class="city-name">Hyderabad</div><div class="city-aqi" style="color:var(--mod)">125</div><div class="city-status" style="color:var(--mod)">Moderate</div></div>
+      <div class="city-card card"><div class="city-name">Patna</div><div class="city-aqi" style="color:var(--vpoor)">315</div><div class="city-status" style="color:var(--vpoor)">Very Poor</div></div>
+      <div class="city-card card"><div class="city-name">Lucknow</div><div class="city-aqi" style="color:var(--poor)">286</div><div class="city-status" style="color:var(--poor)">Poor</div></div>
+      <div class="city-card card"><div class="city-name">Kanpur</div><div class="city-aqi" style="color:var(--poor)">260</div><div class="city-status" style="color:var(--poor)">Poor</div></div>
+      <div class="city-card card"><div class="city-name">Kochi</div><div class="city-aqi" style="color:var(--good)">44</div><div class="city-status" style="color:var(--good)">Good</div></div>
     </div>
   </div>
 
-  <!-- Key Pollutants -->
-  <div class="poll-section">
-    <p class="section-label">Pollutants</p>
-    <p class="section-heading">Key Air Pollutants in India</p>
+  <!-- Pollutants -->
+  <div class="poll-wrap">
+    <div class="section-chip">Pollutants</div>
+    <div class="section-title">The Eight Pollutants CPCB Tracks</div>
+    <div class="divider"></div>
     <div class="poll-grid">
-      <div class="poll-card">
-        <p class="symbol">PM2.5</p>
-        <h3>Fine Particulate Matter</h3>
-        <p>Particles &lt;2.5 microns penetrate deep into the lungs and enter the bloodstream. Major source in India: vehicle exhaust, crop burning, construction dust, and coal combustion.</p>
-      </div>
-      <div class="poll-card">
-        <p class="symbol">PM10</p>
-        <h3>Coarse Particulate Matter</h3>
-        <p>Particles &lt;10 microns cause irritation in the nose and throat. Sources include road dust, unpaved roads, and agricultural operations widespread across India.</p>
-      </div>
-      <div class="poll-card">
-        <p class="symbol">NO₂</p>
-        <h3>Nitrogen Dioxide</h3>
-        <p>Emitted from vehicle engines and thermal power plants. Can irritate airways and aggravate asthma. A key contributor to smog formation in Delhi and Mumbai.</p>
-      </div>
-      <div class="poll-card">
-        <p class="symbol">SO₂</p>
-        <h3>Sulphur Dioxide</h3>
-        <p>Released by coal burning in power plants and industries. Causes respiratory irritation and combines with water to form acid rain, damaging crops and buildings.</p>
-      </div>
-      <div class="poll-card">
-        <p class="symbol">CO</p>
-        <h3>Carbon Monoxide</h3>
-        <p>A colourless, odourless gas from incomplete combustion. High concentrations reduce the oxygen-carrying capacity of blood. Traffic congestion is a primary urban source.</p>
-      </div>
-      <div class="poll-card">
-        <p class="symbol">O₃</p>
-        <h3>Ground-Level Ozone</h3>
-        <p>Forms when sunlight reacts with NOₓ and VOCs. Unlike stratospheric ozone, ground-level ozone causes chest pain, coughing and throat irritation. Peaks on sunny afternoons.</p>
-      </div>
+      <div class="poll-card card"><div class="poll-symbol">PM2.5</div><div class="poll-name">Fine Particulate Matter</div><p class="poll-desc">Particles under 2.5 microns bypass the nose and throat and lodge deep in lung tissue, entering the bloodstream. The most dangerous pollutant in India's cities — sourced from vehicles, crop fires, and power plants.</p></div>
+      <div class="poll-card card"><div class="poll-symbol">PM10</div><div class="poll-name">Coarse Particulate Matter</div><p class="poll-desc">Particles under 10 microns irritate the upper airways. Mainly generated by road dust, unpaved surfaces, construction sites, and industrial operations across India's rapidly urbanising cities.</p></div>
+      <div class="poll-card card"><div class="poll-symbol">NO₂</div><div class="poll-name">Nitrogen Dioxide</div><p class="poll-desc">Emitted by diesel vehicles, two-wheelers, and thermal power plants. Triggers airway inflammation and worsens asthma. A primary precursor to Delhi's characteristic brownish-orange smog.</p></div>
+      <div class="poll-card card"><div class="poll-symbol">SO₂</div><div class="poll-name">Sulphur Dioxide</div><p class="poll-desc">Released by coal-burning power plants concentrated in Jharkhand, Odisha, and Chhattisgarh. Reacts with water vapour to form acid rain, damaging crops and heritage monuments.</p></div>
+      <div class="poll-card card"><div class="poll-symbol">CO</div><div class="poll-name">Carbon Monoxide</div><p class="poll-desc">A colourless, odourless by-product of incomplete combustion in vehicle engines and solid-fuel cookstoves. Reduces the blood's ability to carry oxygen, posing risk in congested spaces.</p></div>
+      <div class="poll-card card"><div class="poll-symbol">O₃</div><div class="poll-name">Ground-Level Ozone</div><p class="poll-desc">Forms when NOₓ and VOCs react in sunlight. Peaks on hot afternoons in cities like Ahmedabad and Pune. Causes chest pain, reduced lung function, and aggravates COPD even in young adults.</p></div>
     </div>
   </div>
 
-  <!-- Protective Tips -->
-  <div class="tips-section">
-    <p class="section-label">Protection</p>
-    <p class="section-heading">How to Protect Yourself</p>
+  <!-- Tips -->
+  <div>
+    <div class="section-chip">Protection</div>
+    <div class="section-title">How to Protect Yourself &amp; Others</div>
+    <div class="divider"></div>
     <div class="tips-grid">
-      <div class="tip-card">
-        <h3>🏃 Outdoor Activity</h3>
-        <ul>
-          <li>Check AQI before any outdoor exercise.</li>
-          <li>Avoid outdoor activity when AQI exceeds 200.</li>
-          <li>Exercise in the early morning when traffic is low.</li>
-          <li>Stay away from heavily congested roads and construction zones.</li>
-          <li>Use N95 or N99 masks on high-pollution days.</li>
-        </ul>
-      </div>
-      <div class="tip-card">
-        <h3>🏠 Indoor Air Quality</h3>
-        <ul>
-          <li>Use HEPA air purifiers, especially in bedrooms.</li>
-          <li>Keep windows closed on poor air quality days.</li>
-          <li>Grow indoor plants that absorb pollutants.</li>
-          <li>Avoid incense, agarbatti, and candles in enclosed spaces.</li>
-          <li>Ensure kitchen exhaust fans are working properly.</li>
-        </ul>
-      </div>
-      <div class="tip-card">
-        <h3>👨‍👩‍👧 Sensitive Groups</h3>
-        <ul>
-          <li>Children, elderly, and pregnant women should take extra caution.</li>
-          <li>People with asthma or COPD should carry inhalers at all times.</li>
-          <li>Consult a doctor for personalised air quality action plans.</li>
-          <li>Ensure children wear masks during commute on smoggy days.</li>
-        </ul>
-      </div>
-      <div class="tip-card">
-        <h3>🌱 Reducing Pollution</h3>
-        <ul>
-          <li>Use public transport, cycle, or carpool to reduce vehicle emissions.</li>
-          <li>Avoid burning waste, leaves, or crop residue.</li>
-          <li>Switch to cleaner cooking fuels (LPG/electric vs. biomass).</li>
-          <li>Support anti-pollution policies and green urban initiatives.</li>
-          <li>Plant trees and support urban greening projects.</li>
-        </ul>
-      </div>
+      <div class="tip-card card"><h3>🏃 Outdoor Safety</h3><ul><li>Always check AQI before morning exercise or outdoor activity.</li><li>Avoid all outdoor exertion when AQI exceeds 200.</li><li>Time walks and runs to early morning before traffic builds.</li><li>Stay at least 200 m away from heavily trafficked roads.</li><li>Wear certified N95 or N99 masks on poor-air days.</li></ul></div>
+      <div class="tip-card card"><h3>🏠 Indoor Air Quality</h3><ul><li>Use HEPA-grade air purifiers in bedrooms and living rooms.</li><li>Seal windows and door gaps on smoggy days.</li><li>Avoid burning agarbatti, dhoop, or candles indoors.</li><li>Install cooktop exhaust fans and use them every time you cook.</li><li>Add spider plants or peace lilies — they absorb some toxins.</li></ul></div>
+      <div class="tip-card card"><h3>👨‍👩‍👧 Sensitive Groups</h3><ul><li>Children's lungs are still developing — give them extra protection.</li><li>Pregnant women should avoid commuting in peak pollution hours.</li><li>Elderly persons and COPD patients should carry rescue inhalers.</li><li>Ask your doctor for a personalised AQI action plan.</li></ul></div>
+      <div class="tip-card card"><h3>🌱 Reduce Your Contribution</h3><ul><li>Choose metro, bus, or cycle over private vehicles when possible.</li><li>Never burn agricultural waste, leaves, or garbage.</li><li>Switch to induction stoves or LPG from solid-biomass cooking.</li><li>Report illegal industrial emissions to your local PCB.</li><li>Plant native trees — neem, peepal, drumstick are highly effective.</li></ul></div>
     </div>
   </div>
-
 </main>
 
 <footer>
-  Data references: Central Pollution Control Board (CPCB) &bull; IQAir World Air Quality Report &bull; MoEF&CC National AQI &bull; WHO Global Air Quality Guidelines
+  <strong>Data sources:</strong> Central Pollution Control Board (CPCB) &bull; IQAir World Air Quality Report &bull; MoEF&CC National AQI Guidelines &bull; WHO Global Air Quality Standards
 </footer>
 
+<script>
+(function(){
+"use strict";
+const canvas=document.getElementById('map-canvas');
+const ctx=canvas.getContext('2d');
+
+const INDIA=[
+  [.390,.015],[.415,.008],[.445,.008],[.475,.010],[.505,.009],[.535,.014],
+  [.565,.014],[.595,.010],[.625,.008],[.650,.014],[.672,.025],[.692,.038],
+  [.712,.038],[.732,.048],[.753,.052],[.772,.052],[.790,.060],[.808,.072],
+  [.825,.082],[.840,.095],[.855,.105],[.870,.108],[.887,.118],[.905,.130],
+  [.920,.145],[.930,.162],[.942,.178],[.958,.192],[.968,.208],[.976,.228],
+  [.978,.250],[.974,.272],[.968,.292],[.975,.312],[.972,.335],[.960,.355],
+  [.950,.372],[.946,.392],[.950,.415],[.948,.438],[.940,.460],[.928,.480],
+  [.920,.500],[.924,.522],[.928,.544],[.920,.565],[.908,.582],[.895,.600],
+  [.880,.620],[.865,.640],[.848,.658],[.830,.675],[.812,.695],[.795,.715],
+  [.778,.735],[.760,.752],[.742,.770],[.724,.788],[.705,.806],[.685,.825],
+  [.665,.845],[.648,.865],[.632,.885],[.620,.908],[.612,.932],[.606,.955],
+  [.600,.978],[.595,1.00],
+  [.583,.975],[.570,.950],[.555,.925],[.538,.902],[.520,.882],[.500,.862],
+  [.478,.845],[.455,.832],[.430,.820],[.405,.812],[.378,.810],[.350,.815],
+  [.324,.820],[.298,.812],[.272,.798],[.248,.780],[.226,.760],[.205,.738],
+  [.186,.714],[.170,.688],[.155,.660],[.140,.630],[.128,.598],[.116,.565],
+  [.106,.532],[.096,.498],[.086,.462],[.076,.428],[.068,.392],[.060,.358],
+  [.050,.324],[.040,.290],[.030,.260],[.022,.232],[.020,.205],[.025,.180],
+  [.035,.158],[.050,.140],[.068,.124],[.088,.110],[.110,.098],[.134,.086],
+  [.160,.075],[.188,.064],[.218,.055],[.250,.046],[.283,.038],[.318,.028],
+  [.354,.020],[.390,.015]
+];
+
+const PALETTE=[[62,207,122],[143,212,74],[245,196,0],[255,107,53],[232,48,48],[176,68,212]];
+
+const PINS=[
+  {n:'Delhi',    nx:.435,ny:.228,c:[176,68,212],v:'340'},
+  {n:'Mumbai',   nx:.238,ny:.542,c:[245,196,0], v:'142'},
+  {n:'Kolkata',  nx:.718,ny:.412,c:[255,107,53],v:'218'},
+  {n:'Chennai',  nx:.490,ny:.735,c:[143,212,74],v:'88'},
+  {n:'Bengaluru',nx:.408,ny:.715,c:[245,196,0], v:'110'},
+  {n:'Hyderabad',nx:.430,ny:.615,c:[245,196,0], v:'125'},
+  {n:'Patna',    nx:.618,ny:.295,c:[232,48,48], v:'315'},
+  {n:'Lucknow',  nx:.508,ny:.265,c:[255,107,53],v:'286'},
+  {n:'Kochi',    nx:.372,ny:.760,c:[62,207,122],v:'44'},
+];
+
+let W,H,mX,mY,mW,mH,mapPath=null,dots=[],tick=0;
+
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+  const padV=H*.055,padH=W*.08;
+  mH=H-padV*2; mW=mH*.70;
+  if(mW>W-padH*2){mW=W-padH*2;mH=mW/.70;}
+  mX=(W-mW)/2; mY=(H-mH)/2;
+  buildPath();
+  dots=[];
+  const count=Math.min(300,Math.floor(W*H/5500));
+  for(let i=0;i<count;i++) spawnDot(true);
+}
+
+function buildPath(){
+  mapPath=new Path2D();
+  INDIA.forEach(([nx,ny],i)=>{
+    const x=mX+nx*mW,y=mY+ny*mH;
+    i===0?mapPath.moveTo(x,y):mapPath.lineTo(x,y);
+  });
+  mapPath.closePath();
+}
+
+function inMap(x,y){return ctx.isPointInPath(mapPath,x,y);}
+
+function randInMap(){
+  let x,y,t=0;
+  do{x=mX+Math.random()*mW;y=mY+Math.random()*mH;t++;}
+  while(!inMap(x,y)&&t<400);
+  return[x,y];
+}
+
+function spawnDot(scatter){
+  const[x,y]=randInMap();
+  const col=PALETTE[Math.floor(Math.random()*PALETTE.length)];
+  const maxL=220+Math.random()*380;
+  dots.push({x,y,baseR:1.2+Math.random()*2.2,alpha:.28+Math.random()*.52,col,
+    speed:.04+Math.random()*.16,angle:Math.random()*Math.PI*2,
+    turnRate:(Math.random()-.5)*.04,life:scatter?Math.random()*maxL:0,
+    maxLife:maxL,phase:Math.random()*100});
+}
+
+function drawMap(){
+  ctx.save();
+  ctx.fillStyle='rgba(255,100,40,0.028)';
+  ctx.fill(mapPath);
+  ctx.restore();
+  ctx.save();
+  ctx.clip(mapPath);
+  ctx.strokeStyle='rgba(255,255,255,.016)';
+  ctx.lineWidth=.8;
+  for(let i=1;i<10;i++){
+    const gx=mX+(mW/10)*i;
+    ctx.beginPath();ctx.moveTo(gx,mY);ctx.lineTo(gx,mY+mH);ctx.stroke();
+  }
+  for(let j=1;j<10;j++){
+    const gy=mY+(mH/10)*j;
+    ctx.beginPath();ctx.moveTo(mX,gy);ctx.lineTo(mX+mW,gy);ctx.stroke();
+  }
+  ctx.restore();
+  ctx.save();
+  ctx.shadowColor='rgba(255,90,35,.55)';
+  ctx.shadowBlur=24;
+  ctx.strokeStyle='rgba(255,100,45,.32)';
+  ctx.lineWidth=1.6;
+  ctx.stroke(mapPath);
+  ctx.restore();
+}
+
+function drawParticles(){
+  ctx.save();
+  ctx.clip(mapPath);
+  for(const d of dots){
+    const fade=45;
+    let op=d.alpha;
+    if(d.life<fade) op*=d.life/fade;
+    if(d.life>d.maxLife-fade) op*=(d.maxLife-d.life)/fade;
+    const pulse=1+.32*Math.sin(d.life*.06+d.phase);
+    const r=d.baseR*pulse;
+    const[cr,cg,cb]=d.col;
+    const g=ctx.createRadialGradient(d.x,d.y,0,d.x,d.y,r*4.5);
+    g.addColorStop(0,`rgba(${cr},${cg},${cb},${op})`);
+    g.addColorStop(.5,`rgba(${cr},${cg},${cb},${op*.38})`);
+    g.addColorStop(1,`rgba(${cr},${cg},${cb},0)`);
+    ctx.beginPath();ctx.arc(d.x,d.y,r*4.5,0,Math.PI*2);
+    ctx.fillStyle=g;ctx.fill();
+    ctx.beginPath();ctx.arc(d.x,d.y,r*.75,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${cr},${cg},${cb},${Math.min(1,op*1.8)})`;
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawLines(){
+  ctx.save();
+  ctx.clip(mapPath);
+  const cap=Math.min(dots.length,110);
+  for(let i=0;i<cap;i++){
+    for(let j=i+1;j<cap;j++){
+      const dx=dots[i].x-dots[j].x,dy=dots[i].y-dots[j].y;
+      const d2=dx*dx+dy*dy;
+      if(d2<55*55){
+        const t=1-Math.sqrt(d2)/55;
+        ctx.beginPath();ctx.moveTo(dots[i].x,dots[i].y);ctx.lineTo(dots[j].x,dots[j].y);
+        ctx.strokeStyle=`rgba(255,115,60,${t*.10})`;ctx.lineWidth=.5;ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function updateParticles(){
+  const dead=[];
+  for(let i=0;i<dots.length;i++){
+    const d=dots[i];d.life++;
+    d.angle+=d.turnRate+(Math.random()-.5)*.02;
+    d.x+=Math.cos(d.angle)*d.speed;
+    d.y+=Math.sin(d.angle)*d.speed;
+    if(d.life>=d.maxLife||!inMap(d.x,d.y)) dead.push(i);
+  }
+  for(let i=dead.length-1;i>=0;i--){dots.splice(dead[i],1);spawnDot(false);}
+}
+
+function drawPins(){
+  const t=tick*.022;
+  for(const p of PINS){
+    const px=mX+p.nx*mW,py=mY+p.ny*mH;
+    const[r,g,b]=p.c;
+    const pulse=1+.35*Math.sin(t+px*.008);
+    ctx.beginPath();ctx.arc(px,py,12*pulse,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(${r},${g},${b},${.15+.08*Math.sin(t+px*.01)})`;
+    ctx.lineWidth=1.2;ctx.stroke();
+    ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);
+    ctx.strokeStyle=`rgba(${r},${g},${b},.55)`;ctx.lineWidth=1.1;ctx.stroke();
+    ctx.beginPath();ctx.arc(px,py,3.2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${r},${g},${b},.95)`;ctx.fill();
+    ctx.textAlign='left';
+    ctx.font='500 10.5px DM Sans,sans-serif';
+    ctx.fillStyle='rgba(236,234,227,.82)';
+    ctx.fillText(p.n,px+14,py+4);
+    ctx.font='300 9px DM Sans,sans-serif';
+    ctx.fillStyle=`rgba(${r},${g},${b},.88)`;
+    ctx.fillText('AQI '+p.v,px+14,py+16);
+  }
+}
+
+function drawVignette(){
+  const vg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.72);
+  vg.addColorStop(0,'rgba(5,6,13,0)');
+  vg.addColorStop(1,'rgba(2,3,8,.65)');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+}
+
+function loop(){
+  requestAnimationFrame(loop);
+  ctx.clearRect(0,0,W,H);
+  drawVignette();
+  drawMap();
+  if(tick%2===0) drawLines();
+  updateParticles();
+  drawParticles();
+  drawPins();
+  tick++;
+}
+
+window.addEventListener('resize',resize);
+resize();
+loop();
+})();
+</script>
 </body>
 </html>
